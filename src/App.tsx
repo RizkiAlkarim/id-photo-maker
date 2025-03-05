@@ -12,11 +12,13 @@ export default function App() {
   } 
 
   return (
+    <div className="h-screen max-w-screen">
       <Navbar />
       <Container> 
         {
           !file ? <FileUploader handleFileChange={handleFileChange} /> : <EditMenu image={file}/>
         }
       </Container>
+    </div>
   )
 }
