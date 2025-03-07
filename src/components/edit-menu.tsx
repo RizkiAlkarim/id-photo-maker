@@ -40,9 +40,9 @@ export default function EditMenu({theme}){
             {
               currentMenu == "crop" ? <CropTool handleRatio={handleRatio} ratio={ratio} theme={theme}/> :
               currentMenu == "bg-selection" ? <BgSelector handleBgColor={handleBgColor} bgColor={bgColor} theme={theme}/> :
-              <FileDownloader/>
+              <FileDownloader theme={theme}/>
             }
-            <MenuNavigation currentMenu={currentMenu} handleCurrentMenu={handleCurrentMenu}/>
+            <MenuNavigation currentMenu={currentMenu} handleCurrentMenu={handleCurrentMenu} theme={theme}/>
           </div>
           </>
         )
