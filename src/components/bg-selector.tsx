@@ -1,15 +1,31 @@
 import MenuNavigation from "./menu-navigation.tsx"
 
-export default function BgSelector({bgColor, handleBgColor}){
+export default function BgSelector({bgColor, handleBgColor, theme}){
+  const colorOption =[
+    {
+      name: "white",
+      style: "bg-[#ffffff]"
+    },
+    {
+      name: "red",
+      style: "bg-[#db1514]"
+    },
+    {
+      name: "blue",
+      style: "bg-[#0090ff]"
+    },
+  ]
+
   return(
     <div className="flex flex-col gap-6">
       <div className="p-4 rounded border-solid border-1">
-        <p className="text-black font-semibold mb-2">Pilih latar belakang</p>
-        <fieldset className="flex gap-2 ">
-          <input type="radio" className="appearance-none checked:border-2 w-8 h-8 rounded bg-white border-solid border-black checked:border-2" name="background-color" checked={bgColor == "white"} onChange={() => handleBgColor("white")}/>
-          <input type="radio" className="appearance-none checked:border-2 w-8 h-8 rounded bg-red-500 border-solid border-black checked:border-2" name="background-color" checked={bgColor == "red"} onChange={() => handleBgColor("red")}/>
-          <input type="radio" className="appearance-none checked:border-2 w-8 h-8 rounded bg-blue-500 border-solid border-black checked:border-2" name="background-color" checked={bgColor == "blue"} onChange={() => handleBgColor("blue")}/>
-          <input type="radio" className="appearance-none checked:border-2 w-8 h-8 rounded bg-black border-solid border-black checked:border-2" name="background-color" checked={bgColor == "pick-color"} onChange={() => handleBgColor("pick-color")}/>
+        <p className={`${theme ? "text-white" : "text-black"} font-semibold mb-2`}>Pilih latar belakang</p>
+        <fieldset className="flex gap-2 items-center">
+          {
+            colorOption.map(({name, style})=> (
+              <input type="radio" key={name} className={`${theme ? "border-white" : "border-black"} ${style} appearance-none checked:border-3 checked:border-green-500 w-8 h-8 rounded border-solid border-1 cursor-pointer`} name="background-color" checked={bgColor == name} onChange={() => handleBgColor(name)}/>
+            ))
+          }
         </fieldset>
       </div>
     </div>

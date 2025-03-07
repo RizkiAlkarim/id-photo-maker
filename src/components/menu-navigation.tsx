@@ -17,7 +17,7 @@ export default function MenuNavigation({currentMenu, handleCurrentMenu}){
         <img src="../../public/previous.svg"/>
         Previous
       </button>
-      <button onClick={() => nextMenu(currentMenu)} className={`flex items-center justify-center gap-2 bg-blue-500 text-white border-solid border-black border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer ${currentMenu == "download" && "hidden"}`}>
+      <button onClick={() => nextMenu(currentMenu)} className={`flex items-center justify-center gap-2 bg-green-500 text-white border-solid border-black border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer ${currentMenu == "download" && "hidden"}`}>
         Next
         <img src="../../public/next.svg"/>
       </button>
