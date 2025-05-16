@@ -1,8 +1,17 @@
-export default function FileUploader({handleFileChange, handleCurrentMenu, theme}){
-  
-  function loadImage(event){
-    const image = event.target.files[0]
+interface Props {
+  theme: boolean;
+  handleCurrentMenu(currentMenu: string): void;
+  handleFileChange(imageData: any): void;
+}
 
+export default function FileUploader({theme, handleFileChange, handleCurrentMenu}: Props){
+  
+  function loadImage(event: React.ChangeEvent<HTMLInputElement>){
+    if (!event.target.files || event.target.files.length === 0) {
+        return;
+    }
+
+    const image = event.target.files[0]
     if(event.target.files && event.target.files[0]) {
       handleFileChange(URL.createObjectURL(image))
       handleCurrentMenu("crop")

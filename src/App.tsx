@@ -1,12 +1,11 @@
 import Navbar from "./components/navbar.tsx"
-import FileUploader from "./components/file-uploader.tsx"
 import Container from "./components/container.tsx"
 import EditMenu from "./components/edit-menu.tsx"
 import {useState} from "react"
 
 export default function App() {
   const [theme, setTheme] = useState<boolean>(true)
-  function handleTheme(selectedTheme){
+  function handleTheme(selectedTheme: boolean){
     setTheme(selectedTheme)
   }
 

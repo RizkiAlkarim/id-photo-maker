@@ -1,6 +1,9 @@
-import MenuNavigation from "./menu-navigation.tsx"
-
-export default function BgSelector({bgColor, handleBgColor, theme}){
+interface Props {
+  bgColor: string;
+  theme: boolean;
+  handleBgColor(color: string): void;
+}
+export default function BgSelector({bgColor, handleBgColor, theme}: Props){
   const colorOption =[
     {
       name: "white",

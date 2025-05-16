@@ -1,4 +1,9 @@
-export default function Navbar({theme, handleTheme}){
+interface Props {
+  theme: boolean;
+  handleTheme: (theme: boolean) => void;
+}
+
+export default function Navbar({theme, handleTheme}: Props){
   return (
     <div className="min-h-[10%] px-12 py-5 border-solid border-b-2">
       <div className="flex justify-between items-center">

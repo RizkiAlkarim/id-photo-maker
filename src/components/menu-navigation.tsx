@@ -1,14 +1,28 @@
-export default function MenuNavigation({currentMenu, handleCurrentMenu, theme}){
+interface Props {
+  currentMenu: string;
+  theme: boolean;
+  handleCurrentMenu(currentMenu: string): void;
+  handleAutoCrop(): void;
+  handleBackground(): void;
+}
 
-  function previousMenu(currentMenu){
-    if(currentMenu == "crop") handleCurrentMenu("upload");
+export default function MenuNavigation({currentMenu, theme, handleCurrentMenu, handleAutoCrop, handleBackground}: Props){
+
+  function previousMenu(currentMenu: string){
+    if(currentMenu == "crop")handleCurrentMenu("upload");
     else if(currentMenu == "bg-selection") handleCurrentMenu("crop");
     else if(currentMenu == "download") handleCurrentMenu("bg-selection");
   }
 
-  function nextMenu(currentMenu){
-    if(currentMenu == "crop") handleCurrentMenu("bg-selection");
-    else if(currentMenu == "bg-selection") handleCurrentMenu("download");
+  function nextMenu(currentMenu: string){
+    if(currentMenu == "crop"){
+      handleCurrentMenu("bg-selection")
+      handleAutoCrop()
+    }
+    else if(currentMenu == "bg-selection"){
+      handleCurrentMenu("download")
+      handleBackground()
+    }
   }
 
   return(
