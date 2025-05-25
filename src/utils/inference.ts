@@ -91,7 +91,6 @@ export async function inference( input: HTMLImageElement | HTMLCanvasElement, co
       width * xRatio,
       height * yRatio,
     ];
-    console.log("second", x, y, w, h)
 
     results.push({
       bbox: [x, y, w, h] as [number, number, number, number],
