@@ -4,7 +4,7 @@ import EditMenu from "./components/edit-menu.tsx"
 import {useState} from "react"
 
 export default function App() {
-  const [theme, setTheme] = useState<boolean>(true)
+  const [theme, setTheme] = useState<boolean>(false)
   function handleTheme(selectedTheme: boolean){
     setTheme(selectedTheme)
   }

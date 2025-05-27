@@ -18,12 +18,6 @@ export interface modelSession{
   nms: InferenceSession;
 }
 
-interface DetectionResult {
-  bbox: [number, number, number, number];  // [x, y, width, height]
-  classIndex: number;
-  score: number;
-}
-
 export interface sessionConfig extends modelSession, config{}
 
 export async function loadModel(/*modelPath: modelPath,*/ config: config): Promise<any>{
@@ -53,17 +47,16 @@ export async function loadModel(/*modelPath: modelPath,*/ config: config): Promi
   return { model, nms };
 };
 
-export async function inference( input: HTMLImageElement | HTMLCanvasElement, config: sessionConfig ): Promise<DetectionResult[]>{
+export async function inference( input: HTMLImageElement, canvasRef: HTMLCanvasElement, config: sessionConfig ): Promise< cv.Mat>{
   const src = cv.imread(input);
+  
   const [preprocessedSrc, xRatio, yRatio] = preprocess(src, config.inputShape[2], config.inputShape[3]);
-  src.delete()
 
   const inputTensor = new Tensor(
     "float32",
     preprocessedSrc.data32F,
     [1, 3, config.inputShape[3], config.inputShape[2]]
   );
-  preprocessedSrc.delete();
 
   const { output0 } = await config.model.run({images: inputTensor});
   const { output_selected } = await config.nms.run({
@@ -85,7 +78,7 @@ export async function inference( input: HTMLImageElement | HTMLCanvasElement, co
     const score = Math.max(...scores);
     const classIndex = scores.indexOf(score);
 
-    const [x, y, w, h] = [
+    let [x, y, w, h] = [
       (xCenter - 0.5 * width) * xRatio,
       (yCenter - 0.5 * height) * yRatio,
       width * xRatio,
@@ -101,7 +94,31 @@ export async function inference( input: HTMLImageElement | HTMLCanvasElement, co
   }
   output_selected.dispose();
 
-  return results;
+  let croppedImage = new cv.Mat();
+  const canvas = canvasRef;
+  if(!canvas) throw new Error("canvas doesn't existed");
+  const canvasCtx = canvas.getContext('2d');
+  if(!canvasCtx) throw new Error("canvas context doesn't existed");
+
+  if (results && results.length > 0) {
+    let [x, y, width, height] = results[0].bbox.map((b: any) => Number(Math.round(b)));
+
+    let yCoordinateToleration = 10;
+    if(y < yCoordinateToleration) y = 0;
+    else y -= yCoordinateToleration;
+        
+    const scaledHeight = width
+    let croppedHeight = height
+    if(height >= scaledHeight) croppedHeight = scaledHeight
+    
+    let cropRect = new cv.Rect(x, y, width, croppedHeight)
+    croppedImage = src.roi(cropRect)
+  }
+
+  src.delete()
+  preprocessedSrc.delete();
+  
+  return croppedImage;
 };
 
 function preprocess(input: cv.Mat, modelWidth: number, modelHeight: number): [cv.Mat, number, number]{

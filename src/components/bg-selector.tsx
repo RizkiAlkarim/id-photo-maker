@@ -26,7 +26,14 @@ export default function BgSelector({bgColor, handleBgColor, theme}: Props){
         <fieldset className="flex gap-2 items-center">
           {
             colorOption.map(({name, style})=> (
-              <input type="radio" key={name} className={`${theme ? "border-white" : "border-black"} ${style} appearance-none checked:border-3 checked:border-green-500 w-8 h-8 rounded border-solid border-1 cursor-pointer`} name="background-color" checked={bgColor == name} onChange={() => handleBgColor(name)}/>
+              <input
+                type="radio"
+                key={name}
+                className={`${theme ? "border-white" : "border-black"} ${style} appearance-none checked:border-3 checked:border-green-500 w-8 h-8 rounded border-solid border-1 cursor-pointer`}
+                name="background-color"
+                checked={bgColor == name}
+                onChange={() => handleBgColor(name)}
+              />
             ))
           }
         </fieldset>

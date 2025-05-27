@@ -49,13 +49,13 @@ export function parseRatio(ratio: number): [number, number] {
 }
 
 export async function runMODNet(
-  input: HTMLImageElement,
+  input: cv.Mat,
   modnet: MODNetSession,
   bgColor: string,
   ratio: number
 ): Promise<HTMLCanvasElement> {
   try {
-    const src = cv.imread(input);
+    const src = input
     if (src.empty()) throw new Error("Input image is empty");
 
     cv.cvtColor(src, src, cv.COLOR_RGBA2RGB);

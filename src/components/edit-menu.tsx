@@ -13,14 +13,13 @@ export default function EditMenu({theme}: {theme: boolean}){
   const imageRef = useRef<HTMLImageElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [image, setImage] = useState(null)
-  const [croppedImage, setCroppedImage] = useState<string | null>(null)
-  const [currentMenu, setCurrentMenu] = useState<string>("crop")
+  const [currentMenu, setCurrentMenu] = useState<string>("edit")
   const [ratio, setRatio] = useState<number>(34)
-  const [bgColor, setBgColor] = useState<string>("")
+  const [bgColor, setBgColor] = useState<string>("red")
   const [session, setSession] = useState<sessionConfig | null>(null)
   const [modnetSession, setMODNetSession] = useState<MODNetSession | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false)
-
+  const [originalFile, setOriginalFile] = useState<File | null>(null)
 
   // const path: modelPath = {
   //   mainModelPath: "/public/model/yolo11n-simplify-dynamic.onnx",
@@ -57,51 +56,14 @@ export default function EditMenu({theme}: {theme: boolean}){
     initializeModel();
   }, [])
 
-  const handleAutoCrop = useCallback(async () => {
-    if(imageRef.current == null){
-      throw new Error("ref null")
-    }
-    if(session == null){
-      throw new Error("session null")
-    }
-
-    try {
-      const output = await inference(imageRef.current, session);
-      if (output && output.length > 0) {
-        let [x, y, width, height] = output[0].bbox.map((b: any) => Number(Math.round(b)));
-        
-        const canvas = canvasRef.current;
-        if(!canvas) return;
-        const canvasCtx = canvas.getContext('2d');
-        if(!canvasCtx) return;
-
-        const yCoordinateToleration = 10;
-        if(y < yCoordinateToleration) y = 0;
-        else y -= yCoordinateToleration;
-        
-        const scaledHeight = width
-        let croppedHeight = height
-        if(height >= scaledHeight) croppedHeight = scaledHeight
-
-        canvas.width = width;
-        canvas.height = croppedHeight;
-        canvasCtx.drawImage(
-          imageRef.current, 
-          x, y, width, croppedHeight, 
-          0, 0, width, croppedHeight
-        );
-        const cropped = canvas.toDataURL("image/jpeg")
-        setCroppedImage(cropped)
-      }
-    } catch (error) {
-      throw new Error("Error occured during autocropping");
-    }}, [session]
-  )
-
 const handleBackground = useCallback(async () => {
-  if (!imageRef.current || !canvasRef.current || !modnetSession) return;
+  if (!imageRef.current || !canvasRef.current || !modnetSession || !session || !originalFile) return;
+  
   try {
-    const resultCanvas = await runMODNet(imageRef.current, modnetSession, bgColor, ratio);
+    const image = await loadFullResImage(originalFile)
+    const croppedImage = await inference(image, canvasRef.current, session);
+    const resultCanvas = await runMODNet(croppedImage, modnetSession, bgColor, ratio);
+
     const ctx = canvasRef.current.getContext("2d");
     if (!ctx) return;
 
@@ -109,10 +71,12 @@ const handleBackground = useCallback(async () => {
     canvasRef.current.height = resultCanvas.height;
     ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
     ctx.drawImage(resultCanvas, 0, 0);
+    handleCurrentMenu("download")
+
   } catch (err) {
     console.error("Background removal processing failed", err);
   }
-}, [modnetSession, bgColor, ratio]);
+}, [session, modnetSession, bgColor, ratio, originalFile]);
 
   function handleFileChange(imageData: any){
     setImage(imageData)
@@ -134,26 +98,43 @@ const handleBackground = useCallback(async () => {
     setIsLoading(status)
   }
 
+  function handleOriginalFile(file: File){
+    setOriginalFile(file)
+  }
+  
+  function loadFullResImage(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        resolve(img);
+      }
+      img.src = URL.createObjectURL(file);
+    })
+  }
+
   return(
     <div className={`${theme ? "border-white bg-black" : "border-black bg-white"} flex justify-betwwen items-end gap-12 p-12 rounded-md border-solid border-2 border-b-8 border-r-8 border-black min-h-[50vh]`}>
     {
       !image || currentMenu == "upload" ?
-        <FileUploader handleFileChange={handleFileChange} handleCurrentMenu={handleCurrentMenu} theme={theme} />
+        <FileUploader handleOriginalFile={handleOriginalFile} handleFileChange={handleFileChange} handleCurrentMenu={handleCurrentMenu} theme={theme} />
         :
         (
           <>
-          <Preview image={croppedImage ?? image} canvasRef={canvasRef} imageRef={imageRef} currentMenu={currentMenu} theme={theme}/>
+          <Preview image={image} canvasRef={canvasRef} imageRef={imageRef} currentMenu={currentMenu}/>
           <div className="flex flex-col gap-4 min-w-max">
             {
-              currentMenu == "crop" ?
-              <CropTool handleRatio={handleRatio} ratio={ratio} theme={theme}/>
-              :
-              currentMenu == "bg-selection" ?
-                <BgSelector handleBgColor={handleBgColor} bgColor={bgColor} theme={theme}/>
+              currentMenu == "edit" ?
+                <>
+                  <CropTool handleRatio={handleRatio} ratio={ratio} theme={theme}/>
+                  <BgSelector handleBgColor={handleBgColor} bgColor={bgColor} theme={theme}/>
+                </>
                 :
-                <FileDownloader canvasRef={canvasRef} theme={theme}/>
+                <>
+                  <FileDownloader canvasRef={canvasRef} theme={theme}/>
+                </>
             }
-            <MenuNavigation isLoading={isLoading} handleLoading={handleLoading} handleAutoCrop={handleAutoCrop} handleBackground={handleBackground} currentMenu={currentMenu} handleCurrentMenu={handleCurrentMenu} theme={theme}/>
+            <MenuNavigation isLoading={isLoading} handleLoading={handleLoading} handleBackground={handleBackground} currentMenu={currentMenu} handleCurrentMenu={handleCurrentMenu} theme={theme}/>
           </div>
           </>
         )

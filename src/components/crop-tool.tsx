@@ -24,7 +24,14 @@ export default function CropTool({ratio, theme, handleRatio}: Props){
             {
               ratioOption.map(({id, aspect}) => (
                 <div key={id} className="flex items-center gap-2">
-                  <input id={id} type="radio" className="appearance-none checked:border-2 w-4 h-4 rounded bg-white border-solid border-black border-2 checked:bg-green-500" name="background-color" checked={ratio == Number(id)} onChange={() => handleRatio(Number(id))}/>
+                  <input
+                    id={id}
+                    type="radio"
+                    className="appearance-none checked:border-2 w-4 h-4 rounded bg-white border-solid border-black border-2 checked:bg-green-500 cursor-pointer"
+                    name="aspect-ratio"
+                    checked={ratio == Number(id)}
+                    onChange={() => handleRatio(Number(id))}
+                  />
                   <label htmlFor={id}>{aspect}</label>
                 </div>
               ))
