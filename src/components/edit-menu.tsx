@@ -120,23 +120,23 @@ const handleBackground = useCallback(async () => {
         <FileUploader handleOriginalFile={handleOriginalFile} handleFileChange={handleFileChange} handleCurrentMenu={handleCurrentMenu} theme={theme} />
         :
         (
-          <>
-          <Preview image={image} canvasRef={canvasRef} imageRef={imageRef} currentMenu={currentMenu}/>
-          <div className="flex flex-col gap-4 min-w-max">
-            {
-              currentMenu == "edit" ?
-                <>
-                  <CropTool handleRatio={handleRatio} ratio={ratio} theme={theme}/>
-                  <BgSelector handleBgColor={handleBgColor} bgColor={bgColor} theme={theme}/>
-                </>
-                :
-                <>
-                  <FileDownloader canvasRef={canvasRef} theme={theme}/>
-                </>
-            }
-            <MenuNavigation isLoading={isLoading} handleLoading={handleLoading} handleBackground={handleBackground} currentMenu={currentMenu} handleCurrentMenu={handleCurrentMenu} theme={theme}/>
+          <div className="flex flex-col justify-between gap-6 md:flex-row w-full">
+            <Preview image={image} canvasRef={canvasRef} imageRef={imageRef} currentMenu={currentMenu}/>
+            <div className="flex flex-col gap-2 min-w-max md:self-end">
+              {
+                currentMenu == "edit" ?
+                  <>
+                    <CropTool handleRatio={handleRatio} ratio={ratio} theme={theme}/>
+                    <BgSelector handleBgColor={handleBgColor} bgColor={bgColor} theme={theme}/>
+                  </>
+                  :
+                  <>
+                    <FileDownloader canvasRef={canvasRef} theme={theme}/>
+                  </>
+              }
+              <MenuNavigation isLoading={isLoading} handleLoading={handleLoading} handleBackground={handleBackground} currentMenu={currentMenu} handleCurrentMenu={handleCurrentMenu} theme={theme}/>
+            </div>
           </div>
-          </>
         )
     }
     </div>

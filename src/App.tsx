@@ -10,7 +10,7 @@ export default function App() {
   }
 
   return (
-    <div className={`${theme ? "bg-black text-white" : "bg-white text-black"} h-screen max-w-screen`}>
+    <div className={`${theme ? "bg-black text-white" : "bg-white text-black"} min-h-screen h-full max-w-screen`}>
       <Navbar handleTheme={handleTheme} theme={theme}/>
       <Container> 
         <EditMenu theme={theme}/>
