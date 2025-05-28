@@ -21,9 +21,8 @@ export interface modelSession{
 export interface sessionConfig extends modelSession, config{}
 
 export async function loadModel(/*modelPath: modelPath,*/ config: config): Promise<any>{
-  env.wasm.wasmPaths = './';
-  env.logLevel = 'verbose'
-  env.debug = true
+  env.wasm.wasmPaths = "./";
+  //"https://unpkg.com/onnxruntime-web@dev/dist/"
 
   const model = await InferenceSession.create("/model/yolo11n.onnx");
   const nms = await InferenceSession.create("/model/yolo-decoder.onnx");

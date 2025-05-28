@@ -1,3 +1,6 @@
+import previousIcon from '@/public/previous.svg'
+import nextIcon from '@/public/next.svg'
+
 interface Props {
   currentMenu: string;
   theme: boolean;
@@ -28,7 +31,7 @@ export default function MenuNavigation({currentMenu, isLoading, theme, handleLoa
         disabled={isLoading}
         className={`flex items-center justify-center gap-2 bg-red-500 text-white border-solid ${theme ? "border-white" : "border-black"} border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer w-full`}
       >
-        <img src="../../public/previous.svg"/>
+        <img src={previousIcon}/>
         Previous
       </button>
       <button
@@ -37,7 +40,7 @@ export default function MenuNavigation({currentMenu, isLoading, theme, handleLoa
         className={`flex items-center justify-center gap-2 bg-green-500 text-white border-solid ${theme ? "border-white" : "border-black"} border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer ${currentMenu == "download" && "hidden"}`}
       >
         Next
-        <img src="../../public/next.svg"/>
+        <img src={nextIcon}/>
       </button>
     </div>
   )
