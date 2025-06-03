@@ -10,8 +10,7 @@ export async function loadMODNetModel(
   modelPath: string,
   config: { refSize: number }
 ): Promise<MODNetSession> {
-  env.wasm.wasmPaths = "./"; //"https://unpkg.com/onnxruntime-web@dev/dist/"
-
+  env.wasm.wasmPaths = "./";
   const session = await InferenceSession.create(modelPath);
   return { session, refSize: config.refSize };
 }

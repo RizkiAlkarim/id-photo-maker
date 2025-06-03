@@ -11,17 +11,23 @@ interface Props {
 }
 
 export default function MenuNavigation({currentMenu, isLoading, theme, handleLoading, handleCurrentMenu, handleBackground}: Props){
-  function previousMenu(currentMenu: string){
+  async function previousMenu(currentMenu: string){
     handleLoading(true)
     if(currentMenu == "edit")handleCurrentMenu("upload");
     else if(currentMenu == "download") handleCurrentMenu("edit");
     handleLoading(false)
   }
 
-  function nextMenu(){
+  async function nextMenu(){
     handleLoading(true)
-    handleBackground()
-    handleLoading(false)
+    try {
+      await handleBackground()
+      handleCurrentMenu("download")
+    } catch(e){
+      throw new Error("error")
+    } finally {
+      handleLoading(false)
+    }
   }
 
   return(

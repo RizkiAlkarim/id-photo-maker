@@ -2,10 +2,10 @@ interface Props {
   theme: boolean;
   handleOriginalFile(file: File): void;
   handleCurrentMenu(currentMenu: string): void;
-  handleFileChange(imageData: any): void;
+  handleImageChange(imageData: any): void;
 }
 
-export default function FileUploader({theme, handleOriginalFile, handleFileChange, handleCurrentMenu}: Props){
+export default function FileUploader({theme, handleOriginalFile, handleImageChange, handleCurrentMenu}: Props){
   
   function loadImage(event: React.ChangeEvent<HTMLInputElement>){
     if (!event.target.files || event.target.files.length === 0) {
@@ -15,7 +15,7 @@ export default function FileUploader({theme, handleOriginalFile, handleFileChang
     const image = event.target.files[0]
     handleOriginalFile(image)
     if(event.target.files && event.target.files[0]) {
-      handleFileChange(URL.createObjectURL(image))
+      handleImageChange(URL.createObjectURL(image))
       handleCurrentMenu("edit")
     }
   }

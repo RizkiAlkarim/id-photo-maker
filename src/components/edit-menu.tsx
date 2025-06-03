@@ -1,31 +1,34 @@
+import { RefObject, useEffect, useRef, useState } from "react"
+import cv from "@techstark/opencv-js"
+import {sessionConfig, config, loadModel} from "../utils/inference.ts"
+import { loadMODNetModel, MODNetSession } from "../utils/modnet.ts";
+import useRatio from "../hooks/useRatio.ts"
+import useBgColor from "../hooks/useBgColor.ts"
+import useCurrentMenu from "../hooks/useCurentMenu.ts"
+import useOriginalFile from "../hooks/useOriginalFile.ts"
+import useLoading from "../hooks/useLoading.ts"
+import useImage from "../hooks/useImage.ts"
+import useBgReplacement from "../hooks/useBgReplacement.ts"
 import Preview from "./preview.tsx"
 import BgSelector from "./bg-selector.tsx"
 import CropTool from "./crop-tool.tsx"
 import FileUploader from "./file-uploader.tsx"
 import FileDownloader from "./file-downloader.tsx"
 import MenuNavigation from "./menu-navigation.tsx"
-import { useCallback, useEffect, useRef, useState } from "react"
-import {sessionConfig, config, loadModel, inference} from "../utils/inference.ts"
-import cv from "@techstark/opencv-js"
-import { loadMODNetModel, runMODNet, MODNetSession } from "../utils/modnet.ts";
 
 export default function EditMenu({theme}: {theme: boolean}){
   const imageRef = useRef<HTMLImageElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [image, setImage] = useState(null)
-  const [currentMenu, setCurrentMenu] = useState<string>("edit")
-  const [ratio, setRatio] = useState<number>(34)
-  const [bgColor, setBgColor] = useState<string>("red")
   const [session, setSession] = useState<sessionConfig | null>(null)
   const [modnetSession, setMODNetSession] = useState<MODNetSession | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [originalFile, setOriginalFile] = useState<File | null>(null)
 
-  // const path: modelPath = {
-  //   mainModelPath: "/public/model/yolo11n-simplify-dynamic.onnx",
-  //   nmsPath: `${window.location.href}public/model/yolo-decoder.onnx`,
-  // }
-  
+  const {image, handleImageChange} = useImage()
+  const {originalFile, handleOriginalFile} = useOriginalFile()
+  const {isLoading, handleLoading} = useLoading()
+  const {currentMenu, handleCurrentMenu} = useCurrentMenu("edit", false)
+  const {ratio, handleRatio} = useRatio(34)
+  const {bgColor, handleBgColor} = useBgColor("red")
+
   const config: config = {
     inputShape: [1, 3, 640, 640],
     topK: 100,
@@ -37,7 +40,7 @@ export default function EditMenu({theme}: {theme: boolean}){
     async function initializeModel(){
       cv["onRuntimeInitialized"] = async () => {
         try {
-          const {model, nms} = await loadModel(/*path,*/ config)
+          const {model, nms} = await loadModel(config)
           setSession({
             model,
             nms,
@@ -56,68 +59,21 @@ export default function EditMenu({theme}: {theme: boolean}){
     initializeModel();
   }, [])
 
-const handleBackground = useCallback(async () => {
-  if (!imageRef.current || !canvasRef.current || !modnetSession || !session || !originalFile) return;
-  
-  try {
-    const image = await loadFullResImage(originalFile)
-    const croppedImage = await inference(image, canvasRef.current, session);
-    const resultCanvas = await runMODNet(croppedImage, modnetSession, bgColor, ratio);
-
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
-
-    canvasRef.current.width = resultCanvas.width;
-    canvasRef.current.height = resultCanvas.height;
-    ctx.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
-    ctx.drawImage(resultCanvas, 0, 0);
-    handleCurrentMenu("download")
-
-  } catch (err) {
-    console.error("Background removal processing failed", err);
-  }
-}, [session, modnetSession, bgColor, ratio, originalFile]);
-
-  function handleFileChange(imageData: any){
-    setImage(imageData)
-  }
-
-  function handleCurrentMenu(currentMenu: string){
-    setCurrentMenu(currentMenu)
-  }
-
-  function handleRatio(selectedRatio: number){
-    setRatio(selectedRatio)
-  }
-
-  function handleBgColor(selectedBgColor: string){
-    setBgColor(selectedBgColor)
-  }
-
-  function handleLoading(status: boolean){
-    setIsLoading(status)
-  }
-
-  function handleOriginalFile(file: File){
-    setOriginalFile(file)
-  }
-  
-  function loadFullResImage(file: File): Promise<HTMLImageElement> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        URL.revokeObjectURL(img.src);
-        resolve(img);
-      }
-      img.src = URL.createObjectURL(file);
-    })
-  }
+  const {handleBackground} = useBgReplacement(
+    imageRef as RefObject<HTMLImageElement>,
+    canvasRef as RefObject<HTMLCanvasElement>,
+    bgColor,
+    ratio,
+    originalFile,
+    modnetSession,
+    session
+  )
 
   return(
     <div className={`${theme ? "border-white bg-black" : "border-black bg-white"} flex justify-betwwen items-end gap-12 p-12 rounded-md border-solid border-2 border-b-8 border-r-8 border-black min-h-[50vh]`}>
     {
       !image || currentMenu == "upload" ?
-        <FileUploader handleOriginalFile={handleOriginalFile} handleFileChange={handleFileChange} handleCurrentMenu={handleCurrentMenu} theme={theme} />
+        <FileUploader handleOriginalFile={handleOriginalFile} handleImageChange={handleImageChange} handleCurrentMenu={handleCurrentMenu} theme={theme} />
         :
         (
           <div className="flex flex-col justify-between gap-6 md:flex-row w-full">

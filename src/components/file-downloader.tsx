@@ -8,7 +8,7 @@ interface Props {
 
 export default function FileDownloader({canvasRef, theme}: Props){
 
-  const downloadImage = ()=>{
+  function downloadImage(){
     const canvas = (canvasRef as RefObject<HTMLCanvasElement>)?.current
     if(!canvas) return
 
