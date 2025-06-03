@@ -1,4 +1,4 @@
-export default function loadFullResImage(file: File): Promise<HTMLImageElement> {
+export default function getFullResImage(file: File): Promise<HTMLImageElement> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
