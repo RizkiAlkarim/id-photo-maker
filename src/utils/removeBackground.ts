@@ -1,53 +1,21 @@
 import { InferenceSession, Tensor, env } from "onnxruntime-web";
 import cv from "@techstark/opencv-js";
 
-export interface MODNetSession {
+export interface BgRemovalSession {
   session: InferenceSession;
   refSize: number;
 }
 
-export async function loadMODNetModel(
-  modelPath: string,
-  config: { refSize: number }
-): Promise<MODNetSession> {
+export async function loadBgRemovalModel(refSize: number): Promise<BgRemovalSession> {
   env.wasm.wasmPaths = "./";
-  const session = await InferenceSession.create(modelPath);
-  return { session, refSize: config.refSize };
+  const session = await InferenceSession.create("/model/modnet.onnx");
+
+  return { session, refSize };
 }
 
-function getScaleFactors(h: number, w: number, refSize: number): [number, number, number, number] {
-  let rw = w,
-    rh = h;
-
-  if (Math.max(h, w) < refSize || Math.min(h, w) > refSize) {
-    if (w >= h) {
-      rh = refSize;
-      rw = Math.floor((w / h) * refSize);
-    } else {
-      rw = refSize;
-      rh = Math.floor((h / w) * refSize);
-    }
-  }
-
-  rw = rw - (rw % 32);
-  rh = rh - (rh % 32);
-
-  const xScale = rw / w;
-  const yScale = rh / h;
-
-  return [rw, rh, xScale, yScale];
-}
-
-export function parseRatio(ratio: number): [number, number] {
-  const str = ratio.toString();
-  if (str.length !== 2) return [1, 1];
-  const w = parseInt(str[0]), h = parseInt(str[1]);
-  return w > 0 && h > 0 ? [w, h] : [1, 1];
-}
-
-export async function runMODNet(
+export async function runBackgroundRemoval(
   input: cv.Mat,
-  modnet: MODNetSession,
+  bgRemoval: BgRemovalSession,
   bgColor: string,
   ratio: number
 ): Promise<HTMLCanvasElement> {
@@ -57,7 +25,7 @@ export async function runMODNet(
 
     cv.cvtColor(src, src, cv.COLOR_RGBA2RGB);
 
-    const [rw, rh] = getScaleFactors(src.rows, src.cols, modnet.refSize);
+    const [rw, rh] = getScaleFactors(src.rows, src.cols, bgRemoval.refSize);
     const resized = new cv.Mat();
     cv.resize(src, resized, new cv.Size(rw, rh), 0, 0, cv.INTER_AREA);
     resized.convertTo(resized, cv.CV_32FC3, 1 / 127.5, -1.0);
@@ -65,12 +33,18 @@ export async function runMODNet(
     const chw = new cv.MatVector();
     cv.split(resized, chw);
     const inputData = new Float32Array(1 * 3 * rh * rw);
-    for (let i = 0; i < 3; i++) inputData.set(chw.get(i).data32F, i * rw * rh);
+    for (let i = 0; i < 3; i++){
+      inputData.set(chw.get(i).data32F, i * rw * rh);
+      chw.get(i).delete()
+    }
     chw.delete();
 
     const inputTensor = new Tensor("float32", inputData, [1, 3, rh, rw]);
-    const output = await modnet.session.run({ [modnet.session.inputNames[0]]: inputTensor });
-    const matteData = output[modnet.session.outputNames[0]].data as Float32Array;
+    const output = await bgRemoval.session.run({ [bgRemoval.session.inputNames[0]]: inputTensor });
+    inputTensor.dispose()
+    const result = output[bgRemoval.session.outputNames[0]]
+    const matteData = result.data as Float32Array;
+    result.dispose()
 
     const matte = new cv.Mat(rh, rw, cv.CV_32FC1);
     matte.data32F.set(matteData);
@@ -126,10 +100,41 @@ export async function runMODNet(
     channels.delete();
     alpha.delete();
     outputMat.delete();
+    subjectCanvas.remove()
 
     return finalCanvas;
   } catch (error) {
-    console.error("MODNet processing failed", error);
+    console.error("Background removal processing failed", error);
     throw error;
   }
+}
+
+function getScaleFactors(h: number, w: number, refSize: number): [number, number, number, number] {
+  let rw = w,
+    rh = h;
+
+  if (Math.max(h, w) < refSize || Math.min(h, w) > refSize) {
+    if (w >= h) {
+      rh = refSize;
+      rw = Math.floor((w / h) * refSize);
+    } else {
+      rw = refSize;
+      rh = Math.floor((h / w) * refSize);
+    }
+  }
+
+  rw = rw - (rw % 32);
+  rh = rh - (rh % 32);
+
+  const xScale = rw / w;
+  const yScale = rh / h;
+
+  return [rw, rh, xScale, yScale];
+}
+
+function parseRatio(ratio: number): [number, number] {
+  const str = ratio.toString();
+  if (str.length !== 2) return [1, 1];
+  const w = parseInt(str[0]), h = parseInt(str[1]);
+  return w > 0 && h > 0 ? [w, h] : [1, 1];
 }

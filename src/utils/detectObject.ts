@@ -1,7 +1,7 @@
 import { InferenceSession, Tensor, env, } from "onnxruntime-web"
 import cv from "@techstark/opencv-js"
 
-export interface modelPath {
+export interface objectDetectionModelPath {
   mainModelPath: string;
   nmsPath: string;
 }
@@ -13,14 +13,14 @@ export interface config {
   scoreThreshold: number;
 };
 
-export interface modelSession{
+export interface objectDetectionSession{
   model: InferenceSession;
   nms: InferenceSession;
 }
 
-export interface sessionConfig extends modelSession, config{}
+export interface sessionConfig extends objectDetectionSession, config{}
 
-export async function loadModel(/*modelPath: modelPath,*/ config: config): Promise<any>{
+export async function loadObjectDetectionModel(config: config): Promise<any>{
   env.wasm.wasmPaths = "./";
 
   const model = await InferenceSession.create("/model/yolo11n.onnx");
@@ -39,13 +39,14 @@ export async function loadModel(/*modelPath: modelPath,*/ config: config): Promi
     score_threshold: new Tensor("float32", new Float32Array([config.scoreThreshold])),
   });
 
+  tensor.dispose()
   output0.dispose();
   output_selected.dispose();
 
   return { model, nms };
 };
 
-export async function inference( input: HTMLImageElement, canvasRef: HTMLCanvasElement, config: sessionConfig ): Promise< cv.Mat>{
+export async function runObjectDetection( input: HTMLImageElement, canvasRef: HTMLCanvasElement, config: sessionConfig ): Promise< cv.Mat>{
   const src = cv.imread(input);
   
   const [preprocessedSrc, xRatio, yRatio] = preprocess(src, config.inputShape[2], config.inputShape[3]);
@@ -63,6 +64,7 @@ export async function inference( input: HTMLImageElement, canvasRef: HTMLCanvasE
     iou_threshold: new Tensor("float32", new Float32Array([config.iouThreshold])),
     score_threshold: new Tensor("float32", new Float32Array([config.scoreThreshold])),
   });
+  inputTensor.dispose()
   output0.dispose();
 
   const results = [];

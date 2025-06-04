@@ -1,6 +1,6 @@
 import { RefObject, useCallback } from "react";
-import { inference, sessionConfig, } from "../utils/inference";
-import { MODNetSession, runMODNet } from "../utils/modnet";
+import { runObjectDetection, sessionConfig, } from "../utils/detectObject";
+import { BgRemovalSession, runBackgroundRemoval } from "../utils/removeBackground";
 import getFullResImage from "../utils/getFullResImage";
 import drawImage from "../utils/drawImage";
 
@@ -10,24 +10,22 @@ export default function useBgReplacement(
   bgColor: string,
   ratio: number,
   originalFile: File | null,
-  modnetSession: MODNetSession | null,
-  session: sessionConfig | null
+  objectDetectionSession: sessionConfig | null,
+  bgRemovalSession: BgRemovalSession | null
 ){
 
-  const handleBackground = useCallback(async (
-  ) => {
-    if (!imageRef || !canvasRef || !modnetSession || !session || !originalFile) return;
+  const handleBackground = useCallback(async () => {
+    if (!imageRef || !canvasRef || !bgRemovalSession || !objectDetectionSession || !originalFile) return;
     
     try {
       const image = await getFullResImage(originalFile)
-      const croppedImage = await inference(image, canvasRef.current, session);
-      const resultCanvas = await runMODNet(croppedImage, modnetSession, bgColor, ratio);
+      const croppedImage = await runObjectDetection(image, canvasRef.current, objectDetectionSession);
+      const resultCanvas = await runBackgroundRemoval(croppedImage, bgRemovalSession, bgColor, ratio);
       drawImage(canvasRef as RefObject<HTMLCanvasElement>, resultCanvas)
-      
     } catch (err) {
       console.error("Background removal processing failed", err);
     }
-  }, [session, modnetSession, bgColor, ratio, originalFile]);
+  }, [objectDetectionSession, bgRemovalSession, bgColor, ratio, originalFile]);
 
   return {
     handleBackground

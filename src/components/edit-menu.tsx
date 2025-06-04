@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useRef, useState } from "react"
 import cv from "@techstark/opencv-js"
-import {sessionConfig, config, loadModel} from "../utils/inference.ts"
-import { loadMODNetModel, MODNetSession } from "../utils/modnet.ts";
+import {sessionConfig, config, loadObjectDetectionModel} from "../utils/detectObject.ts"
+import { loadBgRemovalModel, BgRemovalSession } from "../utils/removeBackground.ts";
 import useRatio from "../hooks/useRatio.ts"
 import useBgColor from "../hooks/useBgColor.ts"
 import useCurrentMenu from "../hooks/useCurentMenu.ts"
@@ -16,11 +16,18 @@ import FileUploader from "./file-uploader.tsx"
 import FileDownloader from "./file-downloader.tsx"
 import MenuNavigation from "./menu-navigation.tsx"
 
+const objectDetectionConfig: config = {
+  inputShape: [1, 3, 640, 640],
+  topK: 100,
+  iouThreshold: 0.45,
+  scoreThreshold: 0.45,
+}
+
 export default function EditMenu({theme}: {theme: boolean}){
   const imageRef = useRef<HTMLImageElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [session, setSession] = useState<sessionConfig | null>(null)
-  const [modnetSession, setMODNetSession] = useState<MODNetSession | null>(null);
+  const [objectDetectionSession, setObjectDetectionSession] = useState<sessionConfig | null>(null)
+  const [backgroundRemovalSession, setBackgroundRemovalSession] = useState<BgRemovalSession | null>(null);
 
   const {image, handleImageChange} = useImage()
   const {originalFile, handleOriginalFile} = useOriginalFile()
@@ -29,28 +36,21 @@ export default function EditMenu({theme}: {theme: boolean}){
   const {ratio, handleRatio} = useRatio(34)
   const {bgColor, handleBgColor} = useBgColor("red")
 
-  const config: config = {
-    inputShape: [1, 3, 640, 640],
-    topK: 100,
-    iouThreshold: 0.45,
-    scoreThreshold: 0.45,
-  }
-
   useEffect(() => {
     async function initializeModel(){
       cv["onRuntimeInitialized"] = async () => {
         try {
-          const {model, nms} = await loadModel(config)
-          setSession({
+          const {model, nms} = await loadObjectDetectionModel(objectDetectionConfig)
+          setObjectDetectionSession({
             model,
             nms,
-            inputShape: config.inputShape,
-            topK: config.topK,
-            iouThreshold: config.iouThreshold,
-            scoreThreshold: config.scoreThreshold
+            inputShape: objectDetectionConfig.inputShape,
+            topK: objectDetectionConfig.topK,
+            iouThreshold: objectDetectionConfig.iouThreshold,
+            scoreThreshold: objectDetectionConfig.scoreThreshold
           })
-          const modnet = await loadMODNetModel("/model/modnet.onnx", { refSize: 512 });
-          setMODNetSession(modnet);
+          const backgroundRemoval = await loadBgRemovalModel(512);
+          setBackgroundRemovalSession(backgroundRemoval);
           } catch(error) {
             throw new Error("Error occured during initialize model")
         }
@@ -65,8 +65,8 @@ export default function EditMenu({theme}: {theme: boolean}){
     bgColor,
     ratio,
     originalFile,
-    modnetSession,
-    session
+    objectDetectionSession,
+    backgroundRemovalSession
   )
 
   return(
