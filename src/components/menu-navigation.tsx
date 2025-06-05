@@ -1,5 +1,4 @@
 import previousIcon from '@/public/previous.svg'
-import nextIcon from '@/public/next.svg'
 
 interface Props {
   currentMenu: string;
@@ -11,14 +10,14 @@ interface Props {
 }
 
 export default function MenuNavigation({currentMenu, isLoading, theme, handleLoading, handleCurrentMenu, handleBackground}: Props){
-  async function previousMenu(currentMenu: string){
+  async function backToPreviousMenu(currentMenu: string){
     handleLoading(true)
     if(currentMenu == "edit")handleCurrentMenu("upload");
     else if(currentMenu == "download") handleCurrentMenu("edit");
     handleLoading(false)
   }
 
-  async function nextMenu(){
+  async function getResultPhoto(){
     handleLoading(true)
     try {
       await handleBackground()
@@ -33,20 +32,19 @@ export default function MenuNavigation({currentMenu, isLoading, theme, handleLoa
   return(
     <div className="grid grid-cols-2 gap-2">
       <button
-        onClick={() => previousMenu(currentMenu)}
+        onClick={() => backToPreviousMenu(currentMenu)}
         disabled={isLoading}
         className={`flex items-center justify-center ${currentMenu == "download" && "col-span-2"} self-end gap-2 bg-red-500 text-white border-solid ${theme ? "border-white" : "border-black"} border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer w-full`}
       >
         <img src={previousIcon}/>
-        Previous
+        Back
       </button>
       <button
-        onClick={() => nextMenu()}
+        onClick={() => getResultPhoto()}
         disabled={isLoading}
-        className={`flex items-center justify-center self-end gap-2 bg-green-500 text-white border-solid ${theme ? "border-white" : "border-black"} border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer ${currentMenu == "download" && "hidden"}`}
+        className={`flex items-center justify-center self-end gap-2 ${isLoading ? "bg-yellow-500" : "bg-green-500"} text-white border-solid ${theme ? "border-white" : "border-black"} border-2 border-b-4 border-r-4 px-4 py-2 rounded font-semibold text-black cursor-pointer ${currentMenu == "download" && "hidden"}`}
       >
-        Next
-        <img src={nextIcon}/>
+        { isLoading ? "Processing" : "Get Result"}
       </button>
     </div>
   )
