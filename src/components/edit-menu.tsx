@@ -70,15 +70,15 @@ export default function EditMenu({theme}: {theme: boolean}){
   )
 
   return(
-    <div className={`${theme ? "border-white bg-black" : "border-black bg-white"} flex justify-betwwen items-end gap-12 p-12 rounded-md border-solid border-2 border-b-8 border-r-8 border-black min-h-[50vh]`}>
+    <div className={`${theme ? "border-white bg-black" : "border-black bg-white"} flex justify-between items-center gap-12 p-12 rounded-md border-solid border-2 border-b-8 border-r-8 border-black max-w-[80vw] lg:max-w-screen lg:min-h-[50vh]`}>
     {
       !image || currentMenu == "upload" ?
         <FileUploader handleOriginalFile={handleOriginalFile} handleImageChange={handleImageChange} handleCurrentMenu={handleCurrentMenu} theme={theme} />
         :
         (
-          <div className="flex flex-col justify-between gap-6 md:flex-row w-full">
+          <div className="flex flex-col lg:flex-row justify-between self-end gap-6 w-full">
             <Preview image={image} canvasRef={canvasRef} imageRef={imageRef} currentMenu={currentMenu}/>
-            <div className="flex flex-col gap-2 min-w-max md:self-end">
+            <div className="flex flex-col gap-2 min-w-full lg:min-w-max self-end">
               {
                 currentMenu == "edit" ?
                   <>

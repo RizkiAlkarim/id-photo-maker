@@ -21,13 +21,13 @@ export default function FileUploader({theme, handleOriginalFile, handleImageChan
   }
 
   return (
-      <div className={`${theme ? "bg-black text-white border-white" : "bg-white text-black border-black"} flex items-center justify-center relative p-32 border-dashed border-2 hover:border-green-500 w-full`}>
+      <div className={`${theme ? "bg-black text-white border-white" : "bg-white text-black border-black"} flex items-center justify-center self-center relative p-12 lg:p-32 border-dashed border-2 hover:border-green-500 w-full`}>
         <button className={`${!theme ? "bg-black text-white" : "bg-white text-black"} px-4 py-2 rounded font-semibold`}>
           Unggah Gambar
         </button>
         <input
           type="file"
-          accept=".png, .jpg, .jpeg"
+          accept="image/*"
           className={`px-4 py-2 text-white rounded font-semibold text-center absolute opacity-0 inset-0 cursor-pointer`}
           onChange={loadImage}
         />
