@@ -1,50 +1,52 @@
-# React + TypeScript + Vite
+# ID Photo Maker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Merupakan sebuah aplikasi berbasis web yang dapat digunakan untuk membuat pas foto secara otomatis. ID Photo Maker memanfaatkan model object detection dan background removal untuk melakukan pemrosesan gambar. ID Photo Maker dibuat guna meningkatkan portabilitas aplikasi pembuatan pasfoto dan privasi pengguna dengan dukungan pemrosesan gambar sepenuhnya dilakukan di sisi klien.
 
-Currently, two official plugins are available:
+## Fitur
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Client-side image processing
+- Offline support (Progressive Web App)
 
-## Expanding the ESLint configuration
+## Teknologi
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- [ONNX Runtime Web](https://onnxruntime.ai/docs/)
+- [OpenCV.js](https://techstark.github.io/opencv-js/)
+- [ReactJS](https://react.dev/)
+- [Vite](https://vite.dev/)
+- [Typescript](https://www.typescriptlang.org/)
 
-- Configure the top-level `parserOptions` property like this:
+## Model
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-});
+- [YOLO11n](https://github.com/ultralytics/ultralytics) (Object detection)
+- [ModNet](https://github.com/ZHKKKe/MODNet) (Background removal)
+
+## Local Setup
+
+### Requirement:
+
+- node.js v22.15.10
+- pnpm v10.4.1
+
+### Clone project
+
+```
+git clone https://github.com/RizkiAlkarim/id-photo-maker.git
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Instal dependency
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react';
+```
+pnpm i
+```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-});
+### Run locally
+
+```
+pnpm run dev
+```
+
+### Deployment
+
+```
+pnpm run build
 ```
