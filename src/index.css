@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* * {
   border: solid red 1px;
@@ -9,5 +9,4 @@
     color: #213547;
     background-color: #ffffff;
   }
-  
 }

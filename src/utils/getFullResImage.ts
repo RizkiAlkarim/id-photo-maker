@@ -4,7 +4,7 @@ export default function getFullResImage(file: File): Promise<HTMLImageElement> {
     img.onload = () => {
       URL.revokeObjectURL(img.src);
       resolve(img);
-    }
+    };
     img.src = URL.createObjectURL(file);
-  })
+  });
 }

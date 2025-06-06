@@ -1,14 +1,14 @@
-import { useState } from "react"
+import { useState } from 'react';
 
-export default function useImage(){
-  const [image, setImage] = useState(null)
+export default function useImage() {
+  const [image, setImage] = useState<string | null>(null);
 
-  function handleImageChange(imageData: any){
-    setImage(imageData)
+  function handleImageChange(imageData: string) {
+    setImage(imageData);
   }
 
-  return{
+  return {
     image,
-    handleImageChange
-  }
+    handleImageChange,
+  };
 }
